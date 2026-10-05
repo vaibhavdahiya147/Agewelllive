@@ -29,7 +29,7 @@
   function showStats(data) {
     byId('plans-count').textContent = Number(data.plansGenerated).toLocaleString('en-IN');
     byId('common-task').textContent = {medicines:'Medicine reminders',appointments:'Appointments',routine:'Daily routines',refills:'Refill checks',none:'No plans yet'}[data.mostCommonTask] || 'Care coordination';
-    byId('stats-state').textContent = 'Live totals from the AgeWell care database';
+    byId('stats-state').textContent = 'Saved coordination drafts · demonstration totals, not verified clinical outcomes';
   }
   async function loadStats() {
     try {showStats(await request('/api/stats'));} catch {byId('stats-state').textContent = 'Live totals are temporarily unavailable.';}

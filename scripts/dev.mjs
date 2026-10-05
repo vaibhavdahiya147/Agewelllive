@@ -3,11 +3,10 @@ import fs from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import carePlan from '../api/care-plan.js';
-import waitlist from '../api/waitlist.js';
 import stats from '../api/stats.js';
 import status from '../api/status.js';
 const root = fileURLToPath(new URL('../',import.meta.url));
-const routes = {'/api/care-plan':carePlan,'/api/waitlist':waitlist,'/api/stats':stats,'/api/status':status};
+const routes = {'/api/care-plan':carePlan,'/api/stats':stats,'/api/status':status};
 const staticFiles = {'/':'index.html','/index.html':'index.html','/assets/planner.css':'assets/planner.css','/assets/planner.js':'assets/planner.js'};
 http.createServer(async(req,res) => {
   const pathname = new URL(req.url,'http://127.0.0.1').pathname;

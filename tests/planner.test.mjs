@@ -31,7 +31,7 @@ test('duplicate, missing, invented tasks and invalid owners fail closed',() => {
   assert.equal(validateAssignments({refused:true,assignments:[]},r.tasks),null);
 });
 test('visitor cookie is signed, HttpOnly, and tampering creates a new identity',() => {
-  process.env.VISITOR_SECRET='test-secret-only-01234567890123456789012345';
+  process.env.GEMINI_API_KEY='test-secret-only-01234567890123456789012345';
   let cookie;const res={setHeader:(name,value)=>{if(name==='Set-Cookie')cookie=value;}};
   const first=visitor({headers:{},socket:{remoteAddress:'127.0.0.1'}},res);
   assert.match(cookie,/HttpOnly/);assert.match(cookie,/SameSite=Lax/);
