@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Join AgeWell’s early-access waitlist for simpler healthcare coordination for your parents.">
+  <title>Join the waitlist — AgeWell</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: Inter, sans-serif; background-color: #eff9ff; background-image: repeating-linear-gradient(0deg, transparent, transparent 43px, #d9edf7 44px); }
+    .hand { font-family: Caveat, cursive; }
+    .card { box-shadow: 7px 8px 0 #acd6e8; }
+    :focus-visible { outline: 3px solid #58b9ee; outline-offset: 4px; }
+    button:disabled { opacity: .65; cursor: wait; }
+    .honeypot { position: absolute; left: -9999px; }
+  </style>
+</head>
+<body class="min-h-screen text-[#293c83] flex flex-col">
+  <header class="bg-white/95 border-b border-blue-100">
+    <nav class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between" aria-label="Main navigation">
+      <a href="/" aria-label="AgeWell home" class="flex items-center gap-3">
+        <span class="bg-[#293c83] text-white rounded-xl p-2 -rotate-3" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M2 15h6l3-9 5 17 3-8h7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="hand text-4xl font-bold">AgeWell</span>
+      </a>
+      <a href="/" class="text-sm font-semibold hover:underline">Back to home</a>
+    </nav>
+  </header>
+  <main class="flex-1 flex items-center justify-center px-5 py-16 sm:py-24">
+    <section class="card bg-[#293c83] text-white rounded-3xl w-full max-w-5xl p-7 sm:p-12 lg:p-16 grid md:grid-cols-2 gap-10 md:gap-14" aria-labelledby="headline">
+      <div>
+        <p class="text-xs font-semibold tracking-[.18em] uppercase text-[#bce6ff]">Let’s build better care, together</p>
+        <h1 id="headline" class="hand text-5xl sm:text-6xl leading-[1.05] mt-6">A little closer.<br>Even from miles away.</h1>
+        <p class="mt-6 leading-7 text-blue-50">You’re building your life. Your parents have their own routines. Keeping medicines, appointments and follow-ups connected shouldn’t feel like a second job.</p>
+        <p class="mt-5 leading-7 text-blue-50">Join AgeWell’s early-access waitlist and help shape a simpler way to care across distance.</p>
+        <p class="hand text-2xl mt-8 text-[#bce6ff]">One health team. One plan. Every doctor.</p>
+      </div>
+      <form id="waitlist-form" class="self-center" aria-describedby="privacy-note">
+        <label for="email" class="block text-sm font-medium mb-3">Your email address</label>
+        <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com" class="w-full rounded-xl border-2 border-blue-100 bg-white px-4 py-4 text-[#293c83] placeholder:text-slate-400">
+        <div class="honeypot" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+        <label class="flex items-start gap-3 mt-5 text-sm leading-6 text-blue-50">
+          <input id="consent" type="checkbox" required class="mt-1 h-5 w-5 shrink-0 accent-sky-300">
+          <span>I agree to store my email with AgeWell in Supabase and receive early-access updates.</span>
+        </label>
+        <button id="submit-button" type="submit" class="mt-6 w-full rounded-xl bg-[#d9f1ff] px-5 py-4 text-[#293c83] font-bold shadow-[4px_4px_0_#80b6d1] hover:bg-white transition-colors">Join the waitlist</button>
+        <p id="privacy-note" class="mt-6 text-xs leading-5 text-blue-100">Only your email and signup consent are saved. No parent’s health information is requested. Early access is a waitlist, not an active care service.</p>
+        <p id="status" role="status" aria-live="polite" aria-atomic="true" class="mt-5 text-sm leading-6 min-h-12"></p>
+      </form>
+    </section>
+  </main>
+  <footer class="text-center px-6 pb-8 text-sm text-[#52648d]">© <span id="year"></span> AgeWell · Care that connects your family.</footer>
+  <script>
+    // Publishable keys belong in browser code. Never replace this with a secret/service-role key.
+    const SUPABASE_URL = 'https://fnsjqezdcxrfotolrcyv.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_4FTT2cyu3WpelttJ-ZeOjA_zBs-TLkC';
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('waitlist-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      if (!form.reportValidity()) return;
+      const button = document.getElementById('submit-button');
+      const status = document.getElementById('status');
+      if (document.getElementById('website').value) {
+        status.textContent = 'Please leave the website field empty.';
+        return;
+      }
+      button.disabled = true;
+      button.textContent = 'Joining…';
+      form.setAttribute('aria-busy', 'true');
+      status.textContent = 'Saving your waitlist entry…';
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/agewell_join_waitlist`, {
+          method: 'POST',
+          headers: { apikey: SUPABASE_PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            p_email: document.getElementById('email').value.trim().toLowerCase(),
+            p_consent: document.getElementById('consent').checked
+          }),
+          signal: controller.signal
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok) throw new Error('Registration is temporarily unavailable. Please try again shortly.');
+        if (result?.registered !== true) throw new Error(result?.message || 'Please check your email and consent, then try again.');
+        status.textContent = result.message || 'You’re on the AgeWell early-access waitlist. Thank you for joining!';
+        form.reset();
+      } catch (error) {
+        status.textContent = error.name === 'AbortError'
+          ? 'The connection timed out. Your signup may have been saved; retrying with the same email will not create a duplicate.'
+          : error.message || 'Unable to connect. Please try again.';
+      } finally {
+        clearTimeout(timeout);
+        button.disabled = false;
+        button.textContent = 'Join the waitlist';
+        form.removeAttribute('aria-busy');
+      }
+    });
+  </script>
+</body>
+</html>
