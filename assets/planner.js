@@ -1,5 +1,21 @@
 (() => {
   const byId = id => document.getElementById(id);
+  const plannerModal = byId('planner');
+  const openPlanner = () => {
+    if (plannerModal.open) return;
+    plannerModal.showModal();
+    byId('planner-form-scroll').scrollTop = 0;
+    plannerModal.scrollTop = 0;
+  };
+  document.querySelectorAll('a[href="#planner"]').forEach(link => link.addEventListener('click',event => {
+    event.preventDefault();
+    openPlanner();
+  }));
+  document.querySelector('.planner-modal-close').addEventListener('click',() => plannerModal.close());
+  plannerModal.addEventListener('click',event => {
+    if (event.target === plannerModal) plannerModal.close();
+  });
+  if (window.location.hash === '#planner') openPlanner();
   // This is a publishable key, not a secret. Database permissions remain server-enforced.
   const supabaseUrl = 'https://fnsjqezdcxrfotolrcyv.supabase.co';
   const publishableKey = 'sb_publishable_4FTT2cyu3WpelttJ-ZeOjA_zBs-TLkC';
@@ -38,9 +54,9 @@
     const button = byId('generate-plan');
     try {plannerReady = Boolean((await request('/api/status')).plannerConfigured);} catch {plannerReady = false;}
     button.disabled = !plannerReady;
-    button.textContent = plannerReady ? 'Create my weekly plan' : 'AI planner · coming soon';
+    button.textContent = plannerReady ? 'Create my weekly plan' : 'Planner setup required';
     if (!plannerReady) {
-      byId('plan-status').textContent = 'The waitlist is open. AI planning will be available after the private server connection is configured.';
+      byId('plan-status').textContent = '';
       byId('stats-state').textContent = 'Care-plan totals will be available when the planner opens.';
     }
   }
@@ -84,8 +100,8 @@
     const status=byId('plan-status'), button=byId('generate-plan');
     button.disabled=true; button.textContent='Creating your plan…'; status.dataset.error='false'; status.textContent='Organizing the routine and saving your shared checklist…'; byId('plan-output').setAttribute('aria-busy','true');
     // Hide stale results so a failed new request cannot look like a fresh success.
-    currentPlan=null; byId('plan-result').hidden=true; byId('plan-empty').hidden=false;
-    try {const plan=await request('/api/care-plan',inputData()); renderPlan(plan); status.textContent='Your weekly coordination draft is ready.'; byId('plan-result').scrollIntoView({behavior:'smooth',block:'nearest'});}
+    currentPlan=null; plannerModal.classList.remove('has-plan'); byId('plan-result').hidden=true; byId('plan-empty').hidden=false;
+    try {const plan=await request('/api/care-plan',inputData()); renderPlan(plan); plannerModal.classList.add('has-plan'); status.textContent='Your weekly coordination draft is ready.'; byId('plan-result').scrollIntoView({behavior:'smooth',block:'nearest'});}
     catch(error){status.dataset.error='true';status.textContent=errorText(error);}
     finally{button.disabled=false;button.textContent='Create my weekly plan';byId('plan-output').setAttribute('aria-busy','false');}
   });
